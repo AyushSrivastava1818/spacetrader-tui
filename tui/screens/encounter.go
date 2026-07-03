@@ -8,6 +8,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 
 	"github.com/the4ofus/spacetrader-tui/internal/encounter"
+	"github.com/the4ofus/spacetrader-tui/internal/formula"
 	"github.com/the4ofus/spacetrader-tui/internal/game"
 )
 
@@ -135,6 +136,11 @@ func (s *EncounterScreen) View() string {
 			actionLabels := make([]string, len(s.enc.Actions))
 			for i, a := range s.enc.Actions {
 				label := a.String()
+				if a == encounter.ActionFlee {
+					pilot := game.EffectivePlayerSkill(s.gs, formula.SkillPilot)
+					chance := 30 + pilot*5
+					label += fmt.Sprintf(" (%d%% escape)", chance)
+				}
 				if a == encounter.ActionBribe && s.enc.Type == encounter.EncPolice {
 					cost := encounter.BribeCost(s.gs)
 					if cost < 0 {
