@@ -32,16 +32,16 @@ type CombatResult struct {
 }
 
 type EnemyShip struct {
-	Name         string
-	Hull         int
-	MaxHull      int
-	Shields      []int
-	WeaponPower  int
-	PilotSkill   int
-	FighterSkill int
+	Name          string
+	Hull          int
+	MaxHull       int
+	Shields       []int
+	WeaponPower   int
+	PilotSkill    int
+	FighterSkill  int
 	EngineerSkill int
-	ShipPrice    int
-	ShipSize     int
+	ShipPrice     int
+	ShipSize      int
 }
 
 func NewPirateShip(gs *game.GameState) EnemyShip {
@@ -165,6 +165,29 @@ func FleeAttempt(rng *rand.Rand, playerPilot int, enemyPilot int, diff gamedata.
 	playerRoll := (rng.Intn(7) + playerPilot/3) * 2
 	enemyRoll := rng.Intn(enemyPilot+1) * (2 + int(diff))
 	return playerRoll >= enemyRoll
+}
+func FleeChance(playerPilot int, enemyPilot int, diff gamedata.Difficulty) float64 {
+	if diff == gamedata.DiffBeginner {
+		return 1.0
+	}
+
+	successes := 0
+	total := 0
+
+	for playerDie := 0; playerDie <= 6; playerDie++ {
+		playerRoll := (playerDie + playerPilot/3) * 2
+
+		for enemyDie := 0; enemyDie <= enemyPilot; enemyDie++ {
+			enemyRoll := enemyDie * (2 + int(diff))
+
+			total++
+			if playerRoll >= enemyRoll {
+				successes++
+			}
+		}
+	}
+
+	return float64(successes) / float64(total)
 }
 
 func FleeDamage(rng *rand.Rand, enemy EnemyShip, gs *game.GameState) CombatRound {

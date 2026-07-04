@@ -317,9 +317,9 @@ func pirateFight(gs *game.GameState, enc *Encounter) Outcome {
 	}
 
 	return Outcome{
-		Message:       fmt.Sprintf("The pirate disengages after a drawn-out fight. You took %d hull damage.", damage),
-		CombatLog:     combatLog,
-		HullDamage:    damage,
+		Message:    fmt.Sprintf("The pirate disengages after a drawn-out fight. You took %d hull damage.", damage),
+		CombatLog:  combatLog,
+		HullDamage: damage,
 	}
 }
 
@@ -331,6 +331,28 @@ func pirateFlee(gs *game.GameState, enc *Encounter) Outcome {
 		enemy = NewPirateShip(gs)
 	}
 	return handleFlee(gs, enemy, 0)
+}
+func FleeEscapeChance(gs *game.GameState, enc *Encounter) float64 {
+	playerPilot := game.EffectivePlayerSkill(gs, formula.SkillPilot)
+
+	var enemy EnemyShip
+
+	switch enc.Type {
+	case EncPirate:
+		if enc.PirateShip != nil {
+			enemy = *enc.PirateShip
+		} else {
+			enemy = NewPirateShip(gs)
+		}
+
+	case EncPolice:
+		enemy = NewPoliceShip(gs)
+
+	default:
+		return 0
+	}
+
+	return FleeChance(playerPilot, enemy.PilotSkill, gs.Difficulty)
 }
 
 func handleFlee(gs *game.GameState, enemy EnemyShip, recordChange int) Outcome {
